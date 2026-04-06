@@ -26,10 +26,12 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.NODE_ENV === 'production' 
-          ? 'https://financeapizorvyn.vercel.app' 
-          : 'http://localhost:5000',
-        description: 'Server',
+        url: 'https://financeapizorvyn.vercel.app',
+        description: 'Production Server',
+      },
+      {
+        url: 'http://localhost:5000',
+        description: 'Local Server',
       },
     ],
     components: {
@@ -43,9 +45,8 @@ const swaggerOptions = {
     },
   },
   apis: [
-    path.join(__dirname, './routes/*.js'),
-    path.join(process.cwd(), 'src/routes/*.js'),
-    './src/routes/*.js'
+    path.join(__dirname, 'routes', '*.js'),
+    path.join(process.cwd(), 'src', 'routes', '*.js'),
   ],
 };
 
