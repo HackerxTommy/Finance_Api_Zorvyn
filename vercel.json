@@ -8,11 +8,11 @@
   ],
   "routes": [
     {
-      "src": "/api-docs",
+      "src": "/api-docs/(.*)",
       "dest": "src/index.js"
     },
     {
-      "src": "/api-docs/(.*)",
+      "src": "/api-docs",
       "dest": "src/index.js"
     },
     {
