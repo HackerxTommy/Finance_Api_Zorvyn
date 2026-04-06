@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -41,7 +42,7 @@ const swaggerOptions = {
       },
     },
   },
-  apis: ['./src/routes/*.js'],
+  apis: [path.join(__dirname, './routes/*.js')],
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
