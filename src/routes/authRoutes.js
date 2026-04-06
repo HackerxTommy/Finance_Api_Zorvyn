@@ -5,6 +5,40 @@ const { protect } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *           enum: [Viewer, Analyst, Admin]
+ *         status:
+ *           type: string
+ *           enum: [active, inactive]
+ *     AuthResponse:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         name:
+ *           type: string
+ *         email:
+ *           type: string
+ *         role:
+ *           type: string
+ *         token:
+ *           type: string
+ */
+
+/**
+ * @swagger
  * /api/auth/register:
  *   post:
  *     summary: Register a new user
@@ -32,6 +66,10 @@ const { protect } = require('../middlewares/authMiddleware');
  *     responses:
  *       201:
  *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
  *       400:
  *         description: User already exists
  */
@@ -60,6 +98,10 @@ router.post('/register', registerUser);
  *     responses:
  *       200:
  *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
  *       401:
  *         description: Invalid credentials
  */
@@ -76,6 +118,12 @@ router.post('/login', loginUser);
  *     responses:
  *       200:
  *         description: User profile data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Not authorized
  */
 router.get('/me', protect, getMe);
 

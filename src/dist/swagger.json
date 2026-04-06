@@ -22,6 +22,114 @@
         "scheme": "bearer",
         "bearerFormat": "JWT"
       }
+    },
+    "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "Viewer",
+              "Analyst",
+              "Admin"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "inactive"
+            ]
+          }
+        }
+      },
+      "AuthResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "token": {
+            "type": "string"
+          }
+        }
+      },
+      "FinancialRecord": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "income",
+              "expense"
+            ]
+          },
+          "category": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "description": {
+            "type": "string"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "properties": {
+          "totalIncome": {
+            "type": "number"
+          },
+          "totalExpenses": {
+            "type": "number"
+          },
+          "netBalance": {
+            "type": "number"
+          },
+          "categoryTotals": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "recentActivity": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinancialRecord"
+            }
+          }
+        }
+      }
     }
   },
   "paths": {
@@ -67,7 +175,14 @@
         },
         "responses": {
           "201": {
-            "description": "User registered successfully"
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "User already exists"
@@ -105,7 +220,14 @@
         },
         "responses": {
           "200": {
-            "description": "Login successful"
+            "description": "Login successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponse"
+                }
+              }
+            }
           },
           "401": {
             "description": "Invalid credentials"
@@ -126,7 +248,17 @@
         ],
         "responses": {
           "200": {
-            "description": "User profile data"
+            "description": "User profile data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
           }
         }
       }
@@ -144,14 +276,27 @@
         ],
         "responses": {
           "200": {
-            "description": "Financial summary data"
+            "description": "Financial summary data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "403": {
+            "description": "Forbidden"
           }
         }
       }
     },
     "/api/records": {
       "post": {
-        "summary": "Create a new financial record",
+        "summary": "Create a new financial record (Analyst, Admin)",
         "tags": [
           "Records"
         ],
@@ -199,7 +344,17 @@
         },
         "responses": {
           "201": {
-            "description": "Record created successfully"
+            "description": "Record created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialRecord"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
           }
         }
       },
@@ -251,14 +406,24 @@
         ],
         "responses": {
           "200": {
-            "description": "List of financial records"
+            "description": "List of financial records",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinancialRecord"
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/records/{id}": {
       "put": {
-        "summary": "Update a financial record",
+        "summary": "Update a financial record (Analyst, Admin)",
         "tags": [
           "Records"
         ],
@@ -310,7 +475,20 @@
         },
         "responses": {
           "200": {
-            "description": "Record updated successfully"
+            "description": "Record updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialRecord"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized to update this record"
+          },
+          "404": {
+            "description": "Record not found"
           }
         }
       },
@@ -336,7 +514,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Record deleted successfully"
+            "description": "Record deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Not authorized"
+          },
+          "404": {
+            "description": "Record not found"
           }
         }
       }
@@ -354,7 +550,23 @@
         ],
         "responses": {
           "200": {
-            "description": "List of users"
+            "description": "List of users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not authorized"
+          },
+          "403": {
+            "description": "Forbidden - Admin only"
           }
         }
       }
@@ -408,7 +620,17 @@
         },
         "responses": {
           "200": {
-            "description": "User updated successfully"
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       },
@@ -434,7 +656,22 @@
         ],
         "responses": {
           "200": {
-            "description": "User deleted successfully"
+            "description": "User deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
           }
         }
       }

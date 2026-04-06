@@ -11,6 +11,48 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     FinancialRecord:
+ *       type: object
+ *       properties:
+ *         _id:
+ *           type: string
+ *         user:
+ *           type: string
+ *         amount:
+ *           type: number
+ *         type:
+ *           type: string
+ *           enum: [income, expense]
+ *         category:
+ *           type: string
+ *         date:
+ *           type: string
+ *           format: date-time
+ *         description:
+ *           type: string
+ *     Summary:
+ *       type: object
+ *       properties:
+ *         totalIncome:
+ *           type: number
+ *         totalExpenses:
+ *           type: number
+ *         netBalance:
+ *           type: number
+ *         categoryTotals:
+ *           type: object
+ *           additionalProperties:
+ *             type: number
+ *         recentActivity:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/FinancialRecord'
+ */
+
+/**
+ * @swagger
  * /api/records/summary:
  *   get:
  *     summary: Get financial summary (Analyst, Admin)
@@ -20,6 +62,14 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
  *     responses:
  *       200:
  *         description: Financial summary data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Summary'
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Forbidden
  */
 router.get('/summary', protect, authorize('Analyst', 'Admin'), getSummary);
 
@@ -27,7 +77,7 @@ router.get('/summary', protect, authorize('Analyst', 'Admin'), getSummary);
  * @swagger
  * /api/records:
  *   post:
- *     summary: Create a new financial record
+ *     summary: Create a new financial record (Analyst, Admin)
  *     tags: [Records]
  *     security:
  *       - bearerAuth: []
@@ -57,6 +107,12 @@ router.get('/summary', protect, authorize('Analyst', 'Admin'), getSummary);
  *     responses:
  *       201:
  *         description: Record created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FinancialRecord'
+ *       400:
+ *         description: Invalid input
  *   get:
  *     summary: Get all financial records (filtered)
  *     tags: [Records]
@@ -85,6 +141,12 @@ router.get('/summary', protect, authorize('Analyst', 'Admin'), getSummary);
  *     responses:
  *       200:
  *         description: List of financial records
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/FinancialRecord'
  */
 router.route('/')
   .post(protect, authorize('Analyst', 'Admin'), createRecord)
@@ -94,7 +156,7 @@ router.route('/')
  * @swagger
  * /api/records/{id}:
  *   put:
- *     summary: Update a financial record
+ *     summary: Update a financial record (Analyst, Admin)
  *     tags: [Records]
  *     security:
  *       - bearerAuth: []
@@ -125,6 +187,14 @@ router.route('/')
  *     responses:
  *       200:
  *         description: Record updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FinancialRecord'
+ *       403:
+ *         description: Not authorized to update this record
+ *       404:
+ *         description: Record not found
  *   delete:
  *     summary: Delete a financial record (Admin only)
  *     tags: [Records]
@@ -139,6 +209,17 @@ router.route('/')
  *     responses:
  *       200:
  *         description: Record deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: Record not found
  */
 router.route('/:id')
   .put(protect, authorize('Analyst', 'Admin'), updateRecord)

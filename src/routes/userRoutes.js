@@ -14,6 +14,16 @@ const { protect, authorize } = require('../middlewares/authMiddleware');
  *     responses:
  *       200:
  *         description: List of users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *       401:
+ *         description: Not authorized
+ *       403:
+ *         description: Forbidden - Admin only
  */
 router.get('/', protect, authorize('Admin'), getUsers);
 
@@ -46,6 +56,12 @@ router.get('/', protect, authorize('Admin'), getUsers);
  *     responses:
  *       200:
  *         description: User updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       404:
+ *         description: User not found
  */
 router.put('/:id', protect, authorize('Admin'), updateUserStatus);
 
@@ -66,6 +82,15 @@ router.put('/:id', protect, authorize('Admin'), updateUserStatus);
  *     responses:
  *       200:
  *         description: User deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: User not found
  */
 router.delete('/:id', protect, authorize('Admin'), deleteUser);
 
