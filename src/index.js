@@ -1,10 +1,10 @@
+const fs = require('fs');
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
 
 dotenv.config();
 
@@ -16,43 +16,44 @@ app.use(express.json());
 // Connect to Database
 connectDB();
 
-const swaggerOptions = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Finance Data API',
-      version: '1.0.0',
-      description: 'API for Finance Data Processing and Access Control',
-    },
-    servers: [
-      {
-        url: 'https://financeapizorvyn.vercel.app',
-        description: 'Production Server',
+let swaggerDocs;
+try {
+  swaggerDocs = require('../dist/swagger.json');
+} catch (e) {
+  const swaggerJsdoc = require('swagger-jsdoc');
+  const swaggerOptions = {
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'Finance Data API',
+        version: '1.0.0',
+        description: 'API for Finance Data Processing and Access Control',
       },
-      {
-        url: 'http://localhost:5000',
-        description: 'Local Server',
-      },
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
+      servers: [
+        {
+          url: 'https://financeapizorvyn.vercel.app',
+          description: 'Production Server',
+        },
+        {
+          url: 'http://localhost:5000',
+          description: 'Local Server',
+        },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
         },
       },
     },
-  },
-  apis: [
-    path.join(__dirname, 'routes', '*.js'),
-    path.join(process.cwd(), 'src', 'routes', '*.js'),
-    './src/routes/*.js',
-    './routes/*.js'
-  ],
-};
+    apis: ['./src/routes/*.js', './routes/*.js'],
+  };
+  swaggerDocs = swaggerJsdoc(swaggerOptions);
+}
 
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 app.use('/api/auth', require('./routes/authRoutes'));
