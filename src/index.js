@@ -23,8 +23,10 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Development server',
+        url: process.env.NODE_ENV === 'production' 
+          ? 'https://financeapizorvyn.vercel.app' 
+          : 'http://localhost:5000',
+        description: 'Server',
       },
     ],
     components: {
@@ -51,9 +53,11 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to Finance Data API' });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
 
 module.exports = app;
